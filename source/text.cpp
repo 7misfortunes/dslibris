@@ -319,15 +319,18 @@ void Text::ClearCache(FT_Face face)
 
 void Text::ClearScreen()
 {
-	const int pixelcount = display.width*display.height;
-	if(invert) memset((void*)screen,0,pixelcount*4);
-	else {
-		memset((void*)screen,255,pixelcount*4);
-		
-		// alternately, off-white...
-		// const u16 pixel = RGB15(29,29,29)|BIT(15);
-		// for (int i=0; i<pixelcount; i++) screen[i] = pixel;
-	}
+    const int pixelcount = display.width * display.height;
+
+    if (invert) {
+        memset((void*)screen, 0, pixelcount * 4);
+    }
+    else {
+        const u16 clearcolor = RGB15(31, 27, 20) | BIT(15);
+
+        for (int i = 0; i < pixelcount * 2; i++) {
+            screen[i] = clearcolor;
+        }
+    }
 }
 
 void Text::ClearRect(u16 xl, u16 yl, u16 xh, u16 yh)
@@ -618,7 +621,7 @@ void Text::PrintChar(u32 ucs, FT_Face face) {
 			u8 a = buffer[gy*width+gx];
 			if (!a) continue;
 			if (!invert) a = 256 - a;
-			u16 pixel = RGB15(a>>3,a>>3,a>>3)|BIT(15);
+			u16 pixel = RGB15(a>>3, (a*27)>>8, (a*20)>>8) | BIT(15);
 #ifdef DRAW_CACHE_MISSES
 			// if(!hit) pixel = RGB15(a>>3,0,0) | BIT(15);
 #endif
